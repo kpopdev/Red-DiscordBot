@@ -810,7 +810,7 @@ class Red(
             return False
 
         if guild:
-            assert isinstance(channel, discord.abc.GuildChannel)  # nosec
+            assert isinstance(channel, (discord.abc.GuildChannel, discord.Thread))  # nosec
             if not channel.permissions_for(guild.me).send_messages:
                 return False
             if not (await self.ignored_channel_or_guild(message)):
@@ -850,6 +850,11 @@ class Red(
             return True
         guild_ignored = await self._ignored_cache.get_ignored_guild(ctx.guild)
         chann_ignored = await self._ignored_cache.get_ignored_channel(ctx.channel)
+        if isinstance(ctx.channel, discord.Thread):
+            chann_ignored |= await self._ignored_cache.get_ignored_channel(
+                ctx.channel.parent,
+                check_category=False,  # already checked for thread
+            )
         return not (guild_ignored or chann_ignored and not perms.manage_channels)
 
     async def get_valid_prefixes(self, guild: Optional[discord.Guild] = None) -> List[str]:
@@ -1205,7 +1210,9 @@ class Red(
 
     async def embed_requested(
         self,
-        channel: Union[discord.TextChannel, commands.Context, discord.User, discord.Member],
+        channel: Union[
+            discord.TextChannel, commands.Context, discord.User, discord.Member, discord.Thread
+        ],
         *,
         command: Optional[commands.Command] = None,
         check_permissions: bool = True,
@@ -1215,7 +1222,7 @@ class Red(
 
         Arguments
         ---------
-        channel : `discord.abc.Messageable`
+        channel : Union[`discord.TextChannel`, `commands.Context`, `discord.User`, `discord.Member`, `discord.Thread`]
             The target messageable object to check embed settings for.
 
         Keyword Arguments
@@ -1259,11 +1266,14 @@ class Red(
                 else channel.channel
             )
 
-        if isinstance(channel, discord.TextChannel):
+        if isinstance(channel, (discord.TextChannel, discord.Thread)):
+            channel_id = channel.parent_id if isinstance(channel, discord.Thread) else channel.id
+
             if check_permissions and not channel.permissions_for(channel.guild.me).embed_links:
                 return False
 
-            if (channel_setting := await self._config.channel(channel).embeds()) is not None:
+            channel_setting = await self._config.channel_from_id(channel_id).embeds()
+            if channel_setting is not None:
                 return channel_setting
 
             if (command_setting := await get_command_setting(channel.guild.id)) is not None:
