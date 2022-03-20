@@ -801,6 +801,11 @@ class Red(
         -------
         bool
             Whether or not the message is eligible to be treated as a command.
+
+        Raises
+        ------
+        TypeError
+            ``message.channel`` is of `discord.PartialMessageable` type.
         """
 
         channel = message.channel
@@ -808,6 +813,12 @@ class Red(
 
         if message.author.bot:
             return False
+
+        # This is raised so that it can be handled (logged) by the user of this API.
+        if isinstance(channel, discord.PartialMessageable):
+            raise TypeError(
+                "Message with PartialMessageable channel is not eligible as a command."
+            )
 
         if guild:
             assert isinstance(channel, (discord.abc.GuildChannel, discord.Thread))  # nosec
@@ -840,7 +851,14 @@ class Red(
         -------
         bool
             `True` if commands are allowed in the channel, `False` otherwise
+
+        Raises
+        ------
+        TypeError
+            ``ctx.channel`` is of `discord.PartialMessageable` type.
         """
+        if isinstance(ctx.channel, discord.PartialMessageable):
+            raise TypeError("Can't check permissions for PartialMessageable.")
         perms = ctx.channel.permissions_for(ctx.author)
         surpass_ignore = (
             isinstance(ctx.channel, discord.abc.PrivateChannel)
@@ -1267,9 +1285,8 @@ class Red(
         Raises
         ------
         TypeError
-            When the passed channel is of type `discord.GroupChannel`
-            or `discord.DMChannel`
-
+            When the passed channel is of type `discord.GroupChannel`,
+            `discord.DMChannel`, or `discord.PartialMessageable`.
         """
 
         async def get_command_setting(guild_id: int) -> Optional[bool]:
@@ -1278,9 +1295,6 @@ class Red(
             scope = self._config.custom(COMMAND_SCOPE, command.qualified_name, guild_id)
             return await scope.embeds()
 
-        if isinstance(channel, (discord.GroupChannel, discord.DMChannel)):
-            raise TypeError("You cannot pass a GroupChannel or DMChannel to this method")
-
         # using dpy_commands.Context to keep the Messageable contract in full
         if isinstance(channel, dpy_commands.Context):
             command = command or channel.command
@@ -1288,6 +1302,13 @@ class Red(
                 channel.author
                 if isinstance(channel.channel, discord.DMChannel)
                 else channel.channel
+            )
+
+        if isinstance(
+            channel, (discord.GroupChannel, discord.DMChannel, discord.PartialMessageable)
+        ):
+            raise TypeError(
+                "You cannot pass a GroupChannel, DMChannel, or PartialMessageable to this method."
             )
 
         if isinstance(channel, (discord.TextChannel, discord.Thread)):
