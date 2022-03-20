@@ -12,6 +12,7 @@ from fuzzywuzzy import process
 from redbot.core import Config, checks, commands
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import menus, AsyncIter
+from redbot.core.utils._internal_utils import bot_can_react
 from redbot.core.utils.chat_formatting import box, pagify, escape, humanize_list
 from redbot.core.utils.predicates import MessagePredicate
 
@@ -539,7 +540,7 @@ class CustomCommands(commands.Cog):
             )
 
     @customcom.command(name="list")
-    @checks.bot_has_permissions(add_reactions=True)
+    @bot_can_react()
     async def cc_list(self, ctx: commands.Context):
         """List all available custom commands.
 

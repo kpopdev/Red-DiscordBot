@@ -18,6 +18,7 @@ from redbot.core.commands import UserInputOptional
 from redbot.core.data_manager import cog_data_path
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
+from redbot.core.utils._internal_utils import bot_can_react
 from redbot.core.utils.chat_formatting import bold, pagify
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 from redbot.core.utils.predicates import MessagePredicate
@@ -38,7 +39,8 @@ _ = Translator("Audio", Path(__file__))
 class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
     @commands.group(name="playlist")
     @commands.guild_only()
-    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    @commands.bot_has_permissions(embed_links=True)
+    @bot_can_react()
     async def command_playlist(self, ctx: commands.Context):
         """Playlist configuration options.
 

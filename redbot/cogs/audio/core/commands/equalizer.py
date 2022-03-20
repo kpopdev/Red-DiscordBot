@@ -9,6 +9,7 @@ from red_commons.logging import getLogger
 
 from redbot.core import commands
 from redbot.core.i18n import Translator
+from redbot.core.utils._internal_utils import bot_can_react
 from redbot.core.utils.chat_formatting import box, humanize_number, pagify
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu, start_adding_reactions
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
@@ -25,7 +26,8 @@ class EqualizerCommands(MixinMeta, metaclass=CompositeMetaClass):
     @commands.group(name="eq", invoke_without_command=True)
     @commands.guild_only()
     @commands.cooldown(1, 15, commands.BucketType.guild)
-    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    @commands.bot_has_permissions(embed_links=True)
+    @bot_can_react()
     async def command_equalizer(self, ctx: commands.Context):
         """Equalizer management.
 

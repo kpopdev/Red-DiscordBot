@@ -12,6 +12,7 @@ from red_commons.logging import getLogger
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
+from redbot.core.utils._internal_utils import bot_can_react
 from redbot.core.utils.menus import (
     DEFAULT_CONTROLS,
     close_menu,
@@ -32,7 +33,8 @@ _ = Translator("Audio", Path(__file__))
 class QueueCommands(MixinMeta, metaclass=CompositeMetaClass):
     @commands.group(name="queue", invoke_without_command=True)
     @commands.guild_only()
-    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    @commands.bot_has_permissions(embed_links=True)
+    @bot_can_react()
     async def command_queue(self, ctx: commands.Context, *, page: int = 1):
         """List the songs in the queue."""
 

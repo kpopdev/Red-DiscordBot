@@ -14,6 +14,7 @@ from redbot.core import commands
 from redbot.core.commands import UserInputOptional
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
+from redbot.core.utils._internal_utils import bot_can_react
 from redbot.core.utils.menus import DEFAULT_CONTROLS, close_menu, menu, next_page, prev_page
 
 from ...audio_dataclasses import _PARTIALLY_SUPPORTED_MUSIC_EXT, Query
@@ -634,7 +635,8 @@ class PlayerCommands(MixinMeta, metaclass=CompositeMetaClass):
 
     @commands.command(name="search")
     @commands.guild_only()
-    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    @commands.bot_has_permissions(embed_links=True)
+    @bot_can_react()
     async def command_search(self, ctx: commands.Context, *, query: str):
         """Pick a track with a search.
 

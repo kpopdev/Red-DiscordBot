@@ -14,6 +14,7 @@ from redbot.core import Config, commands, checks, bank
 from redbot.core.data_manager import cog_data_path
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import AsyncIter
+from redbot.core.utils._internal_utils import can_react_in
 from redbot.core.utils.chat_formatting import box, pagify, bold
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
@@ -672,7 +673,7 @@ class Trivia(commands.Cog):
                 filename=filename
             )
 
-            can_react = ctx.channel.permissions_for(ctx.me).add_reactions
+            can_react = can_react_in(ctx.channel, ctx.me)
             if not can_react:
                 overwrite_message += " (yes/no)"
 

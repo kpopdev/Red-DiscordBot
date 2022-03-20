@@ -9,6 +9,7 @@ import discord
 from discord.ext.commands import Context as DPYContext
 
 from .requires import PermState
+from ..utils._internal_utils import can_react_in
 from ..utils.chat_formatting import box
 from ..utils.predicates import MessagePredicate
 from ..utils import common_filters
@@ -139,7 +140,7 @@ class Context(DPYContext):
             :code:`True` if adding the reaction succeeded.
         """
         try:
-            if not self.channel.permissions_for(self.me).add_reactions:
+            if not can_react_in(self.channel, self.me):
                 raise RuntimeError
             await self.message.add_reaction(reaction)
         except (RuntimeError, discord.HTTPException):
