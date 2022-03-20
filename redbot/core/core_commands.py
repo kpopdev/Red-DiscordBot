@@ -40,7 +40,7 @@ from . import (
 )
 from ._diagnoser import IssueDiagnoser
 from .utils import AsyncIter
-from .utils._internal_utils import fetch_latest_red_version_info
+from .utils._internal_utils import fetch_latest_red_version_info, user_can_manage_channel
 from .utils.predicates import MessagePredicate
 from .utils.chat_formatting import (
     box,
@@ -5165,7 +5165,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
 
     @commands.group()
     @commands.guild_only()
-    @checks.admin_or_permissions(manage_channels=True)
+    @user_can_manage_channel(commands.PrivilegeLevel.ADMIN)
     async def ignore(self, ctx: commands.Context):
         """
         Commands to add servers or channels to the ignore list.
@@ -5238,7 +5238,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
 
     @commands.group()
     @commands.guild_only()
-    @checks.admin_or_permissions(manage_channels=True)
+    @user_can_manage_channel(commands.PrivilegeLevel.ADMIN)
     async def unignore(self, ctx: commands.Context):
         """Commands to remove servers or channels from the ignore list."""
 
