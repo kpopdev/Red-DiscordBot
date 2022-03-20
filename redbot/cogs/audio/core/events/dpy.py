@@ -15,6 +15,7 @@ from discord.ext.commands import CheckFailure
 
 from redbot.core import commands
 from redbot.core.i18n import Translator
+from redbot.core.utils._internal_utils import can_send_messages_in
 from redbot.core.utils.chat_formatting import box, humanize_list
 
 from ...errors import TrackEnqueueError
@@ -54,6 +55,24 @@ class DpyEvents(MixinMeta, metaclass=CompositeMetaClass):
             or await ctx.bot.is_admin(ctx.author)
         )
         guild = ctx.guild
+        if guild and not can_send_messages_in(ctx.channel, ctx.me):
+            log.debug(
+                "Missing perms to send messages in %d, Owner ID: %d",
+                ctx.guild.id,
+                ctx.guild.owner.id,
+            )
+            if not surpass_ignore:
+                text = _(
+                    "I'm missing permissions to send messages in this server. "
+                    "Please address this as soon as possible."
+                )
+                log.info(
+                    "Missing write permission in %d, Owner ID: %d",
+                    ctx.guild.id,
+                    ctx.guild.owner.id,
+                )
+                raise CheckFailure(message=text)
+
         if guild and not current_perms.is_superset(self.permission_cache):
             current_perms_set = set(iter(current_perms))
             expected_perms_set = set(iter(self.permission_cache))

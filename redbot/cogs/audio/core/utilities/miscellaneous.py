@@ -17,6 +17,7 @@ from redbot.core import bank, commands
 from redbot.core.commands import Context
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
+from redbot.core.utils._internal_utils import can_send_messages_in
 from redbot.core.utils.chat_formatting import humanize_number
 
 from ...apis.playlist_interface import get_all_playlist_for_migration23
@@ -102,7 +103,7 @@ class MiscellaneousUtilities(MixinMeta, metaclass=CompositeMetaClass):
 
     def _has_notify_perms(self, channel: Union[discord.TextChannel, discord.Thread]) -> bool:
         perms = channel.permissions_for(channel.guild.me)
-        return all((perms.send_messages, perms.embed_links))
+        return all((can_send_messages_in(channel, channel.guild.me), perms.embed_links))
 
     async def maybe_run_pending_db_tasks(self, ctx: commands.Context) -> None:
         if self.api_interface is not None:

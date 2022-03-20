@@ -52,7 +52,7 @@ from .settings_caches import (
 )
 from .rpc import RPCMixin
 from .utils import common_filters, AsyncIter
-from .utils._internal_utils import send_to_owners_with_prefix_replaced
+from .utils._internal_utils import can_send_messages_in, send_to_owners_with_prefix_replaced
 
 CUSTOM_GROUPS = "CUSTOM_GROUPS"
 COMMAND_SCOPE = "COMMAND"
@@ -821,8 +821,8 @@ class Red(
             )
 
         if guild:
-            assert isinstance(channel, (discord.abc.GuildChannel, discord.Thread))  # nosec
-            if not channel.permissions_for(guild.me).send_messages:
+            assert isinstance(channel, (discord.abc.GuildChannel, discord.Thread))
+            if not can_send_messages_in(channel, guild.me):
                 return False
             if guild.me.is_timed_out():
                 return False
