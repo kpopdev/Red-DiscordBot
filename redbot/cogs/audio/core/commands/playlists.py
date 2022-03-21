@@ -265,9 +265,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [
@@ -394,9 +392,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -473,9 +469,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -563,9 +557,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         async with ctx.typing():
             if scope_data is None:
@@ -698,9 +690,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -831,9 +821,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -954,9 +942,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1109,9 +1095,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         async with ctx.typing():
             if scope_data is None:
@@ -1219,9 +1203,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1337,9 +1319,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1463,9 +1443,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1641,9 +1619,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1812,9 +1788,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
@@ -1978,9 +1952,7 @@ class PlaylistCommands(MixinMeta, metaclass=CompositeMetaClass):
                 ctx,
                 title=_("Playlists Are Not Available"),
                 description=_("The playlist section of Audio is currently unavailable"),
-                footer=discord.Embed.Empty
-                if not await self.bot.is_owner(ctx.author)
-                else _("Check your logs."),
+                footer=None if not await self.bot.is_owner(ctx.author) else _("Check your logs."),
             )
         if scope_data is None:
             scope_data = [None, ctx.author, ctx.guild, False]
