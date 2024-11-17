@@ -9,71 +9,43 @@ from .common_filters import filter_mass_mentions
 
 __all__ = ("Tunnel",)
 
-_instances = weakref.WeakValueDictionary({})
+_instances = weakref.WeakValueDictionary()
 
 
 class TunnelMeta(type):
-    """
-    lets prevent having multiple tunnels with the same
-    places involved.
-    """
+    """Prevent multiple tunnels with the same origin and recipient."""
 
     def __call__(cls, *args, **kwargs):
         lockout_tuple = ((kwargs.get("sender"), kwargs.get("origin")), kwargs.get("recipient"))
 
+        # Check if this tunnel already exists
         if lockout_tuple in _instances:
             return _instances[lockout_tuple]
 
-        # this is needed because weakvalue dicts can
-        # change size without warning if an object is discarded
-        # it can raise a runtime error, so ..
-        while True:
-            try:
-                if not (
-                    any(lockout_tuple[0] == x[0] for x in _instances.keys())
-                    or any(lockout_tuple[1] == x[1] for x in _instances.keys())
-                ):
-                    # if this isn't temporarily stored, the weakref dict
-                    # will discard this before the return statement,
-                    # causing a key error
-                    temp = super(TunnelMeta, cls).__call__(*args, **kwargs)
-                    _instances[lockout_tuple] = temp
-                    return temp
-            except:  # NOQA: E722
-                # Am I really supposed to except a runtime error flake >.>
-                continue
-            else:
-                return None
+        if not (any(lockout_tuple[0] == x[0] for x in _instances.keys()) or 
+                any(lockout_tuple[1] == x[1] for x in _instances.keys())):
+            # Create a new tunnel if unique
+            tunnel_instance = super().__call__(*args, **kwargs)
+            _instances[lockout_tuple] = tunnel_instance
+            return tunnel_instance
+        return None
 
 
 class Tunnel(metaclass=TunnelMeta):
     """
-    A tunnel interface for messages
-
-    This will return None on init if the destination
-    or source + origin pair is already in use, or the
-    existing tunnel object if one exists for the designated
-    parameters
+    A tunnel interface for messages.
 
     Attributes
     ----------
-    sender: `discord.Member`
-        The person who opened the tunnel
-    origin: `discord.TextChannel`, `discord.VoiceChannel`, `discord.StageChannel`, or `discord.Thread`
-        The channel in which it was opened
-    recipient: `discord.User`
-        The user on the other end of the tunnel
+    sender: discord.Member
+        The person who opened the tunnel.
+    origin: Union[discord.TextChannel, discord.VoiceChannel, discord.StageChannel, discord.Thread]
+        The channel in which it was opened.
+    recipient: discord.User
+        The user on the other end of the tunnel.
     """
 
-    def __init__(
-        self,
-        *,
-        sender: discord.Member,
-        origin: Union[
-            discord.TextChannel, discord.VoiceChannel, discord.StageChannel, discord.Thread
-        ],
-        recipient: discord.User,
-    ):
+    def __init__(self, *, sender: discord.Member, origin: Union[discord.TextChannel, discord.VoiceChannel, discord.StageChannel, discord.Thread], recipient: discord.User):
         self.sender = sender
         self.origin = origin
         self.recipient = recipient
@@ -81,7 +53,7 @@ class Tunnel(metaclass=TunnelMeta):
 
     async def react_close(self, *, uid: int, message: str = ""):
         send_to = self.recipient if uid == self.sender.id else self.origin
-        closer = next(filter(lambda x: x.id == uid, (self.sender, self.recipient)), None)
+        closer = self.sender if uid == self.sender.id else self.recipient
         await send_to.send(filter_mass_mentions(message.format(closer=closer)))
 
     @property
@@ -90,139 +62,56 @@ class Tunnel(metaclass=TunnelMeta):
 
     @property
     def minutes_since(self):
-        return int((self.last_interaction - datetime.utcnow()).seconds / 60)
+        return int((datetime.utcnow() - self.last_interaction).seconds / 60)
 
     @staticmethod
-    async def message_forwarder(
-        *,
-        destination: discord.abc.Messageable,
-        content: str = None,
-        embed=None,
-        files: Optional[List[discord.File]] = None,
-    ) -> List[discord.Message]:
+    async def message_forwarder(*, destination: discord.abc.Messageable, content: str = None, embed=None, files: Optional[List[discord.File]] = None) -> List[discord.Message]:
         """
-        This does the actual sending, use this instead of a full tunnel
-        if you are using command initiated reactions instead of persistent
-        event based ones
+        Forwards a message to the specified destination.
 
-        Parameters
-        ----------
-        destination: discord.abc.Messageable
-            Where to send
-        content: str
-            The message content
-        embed: discord.Embed
-            The embed to send
-        files: Optional[List[discord.File]]
-            A list of files to send.
-
-        Returns
-        -------
-        List[discord.Message]
-            The messages sent as a result.
-
-        Raises
-        ------
-        discord.Forbidden
-            see `discord.abc.Messageable.send`
-        discord.HTTPException
-            see `discord.abc.Messageable.send`
+        Returns List[discord.Message]: Messages sent as a result.
         """
-        rets = []
+        messages = []
         if content:
             for page in pagify(content):
-                rets.append(await destination.send(page, files=files, embed=embed))
+                messages.append(await destination.send(page, files=files, embed=embed))
                 files = embed = None
         elif embed or files:
-            rets.append(await destination.send(files=files, embed=embed))
-        return rets
+            messages.append(await destination.send(files=files, embed=embed))
+        return messages
 
     @staticmethod
-    async def files_from_attach(
-        m: discord.Message, *, use_cached: bool = False, images_only: bool = False
-    ) -> List[discord.File]:
+    async def files_from_attach(m: discord.Message, *, use_cached: bool = False, images_only: bool = False) -> List[discord.File]:
         """
-        makes a list of file objects from a message
-        returns an empty list if none, or if the sum of file sizes
-        is too large for the bot to send
+        Creates a list of file objects from a message.
 
-        Parameters
-        ---------
-        m: `discord.Message`
-            A message to get attachments from
-        use_cached: `bool`
-            Whether to use ``proxy_url`` rather than ``url`` when downloading the attachment
-        images_only: `bool`
-            Whether only image attachments should be added to returned list
-
-        Returns
-        -------
-        list of `discord.File`
-            A list of `discord.File` objects
-
+        Returns List[discord.File]: A list of file objects, or an empty list.
         """
         files = []
-        max_size = 26214400
+        max_size = 26214400  # 25MB
         if m.attachments and sum(a.size for a in m.attachments) <= max_size:
             for a in m.attachments:
                 if images_only and a.height is None:
-                    # if this is None, it's not an image
                     continue
                 try:
                     file = await a.to_file()
                 except discord.HTTPException as e:
-                    # this is required, because animated webp files aren't cached
                     if not (e.status == 415 and images_only and use_cached):
                         raise
                 else:
                     files.append(file)
         return files
 
-    # Backwards-compatible typo fix (GH-2496)
-    files_from_attatch = files_from_attach
-
     async def close_because_disabled(self, close_message: str):
-        """
-        Sends a message to both ends of the tunnel that the tunnel is now closed.
-
-        Parameters
-        ----------
-        close_message: str
-            The message to send to both ends of the tunnel.
-        """
-
+        """Informs both ends of the tunnel that it is now closed."""
         tasks = [destination.send(close_message) for destination in (self.recipient, self.origin)]
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def communicate(
-        self, *, message: discord.Message, topic: str = None, skip_message_content: bool = False
-    ):
+    async def communicate(self, *, message: discord.Message, topic: str = None, skip_message_content: bool = False):
         """
-        Forwards a message.
+        Forwards a message based on the defined rules.
 
-        Parameters
-        ----------
-        message : `discord.Message`
-            The message to forward
-        topic : `str`
-            A string to prepend
-        skip_message_content : `bool`
-            If this flag is set, only the topic will be sent
-
-        Returns
-        -------
-        `int`, `int`
-            a pair of ints matching the ids of the
-            message which was forwarded
-            and the last message the bot sent to do that.
-            useful if waiting for reactions.
-
-        Raises
-        ------
-        discord.Forbidden
-            This should only happen if the user's DMs are disabled
-            the bot can't upload at the origin channel
-            or can't add reactions there.
+        Returns Tuple[int, int]: Message IDs of the forwarded message and the bot's last message.
         """
         if message.channel.id == self.origin.id and message.author == self.sender:
             send_to = self.recipient
@@ -231,21 +120,12 @@ class Tunnel(metaclass=TunnelMeta):
         else:
             return None
 
-        if not skip_message_content:
-            content = "\n".join((topic, message.content)) if topic else message.content
-        else:
-            content = topic
+        content = f"{topic}\n{message.content}" if topic and not skip_message_content else topic
 
-        if message.attachments:
-            attach = await self.files_from_attach(message)
-            if not attach:
-                await message.channel.send(
-                    "Could not forward attachments. "
-                    "Total size of attachments in a single "
-                    "message must be less than 8MB."
-                )
-        else:
-            attach = []
+        attach = await self.files_from_attach(message) if message.attachments else []
+
+        if not attach and message.attachments:
+            await message.channel.send("Could not forward attachments. Total size of attachments must be less than 25MB.")
 
         rets = await self.message_forwarder(destination=send_to, content=content, files=attach)
 
