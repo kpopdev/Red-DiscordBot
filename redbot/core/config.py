@@ -101,7 +101,7 @@ class _ValueCtxManager(Awaitable[_T], AsyncContextManager[_T]):  # pylint: disab
         return self.coro.__await__()
 
     async def __aenter__(self) -> _T:
-        if self.__acquire_lock is True:
+        if self.__acquire_lock:
             await self.__lock.acquire()
         self.raw_value = await self
         if not isinstance(self.raw_value, (list, dict)):
@@ -122,7 +122,7 @@ class _ValueCtxManager(Awaitable[_T], AsyncContextManager[_T]):  # pylint: disab
             if raw_value != self.__original_value:
                 await self.value_obj.set(self.raw_value)
         finally:
-            if self.__acquire_lock is True:
+            if self.__acquire_lock:
                 self.__lock.release()
 
 
@@ -182,10 +182,10 @@ class Value:
 
     async def _get(self, default=...):
         try:
-            ret = await self._driver.get(self.identifier_data)
+            return await self._driver.get(self.identifier_data)
         except KeyError:
             return default if default is not ... else self.default
-        return ret
+
 
     def __call__(self, default=..., *, acquire_lock: bool = True) -> _ValueCtxManager[Any]:
         """Get the literal value of this data element.
@@ -314,8 +314,8 @@ class Group(Value):
         raw = await super()._get(default)
         if isinstance(raw, dict):
             return self.nested_update(raw, default)
-        else:
-            return raw
+        return raw
+            
 
     # noinspection PyTypeChecker
     def __getattr__(self, item: str) -> Union["Group", Value]:
